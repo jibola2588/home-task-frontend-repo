@@ -2,26 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255; */
+/* } */
+
+body{
+  padding:0;
+  margin:0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+/* Loading animation */
+@-webkit-keyframes rotate {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to { 
+    -webkit-transform: rotate(360deg);
   }
 }
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to { 
+    transform: rotate(360deg);
+  }
+}
+.loading-animation {
+  -webkit-animation-name:             rotate; 
+  -webkit-animation-duration:         1s; 
+  -webkit-animation-iteration-count:  infinite;
+  -webkit-transition-timing-function: linear;
+  animation-name:             rotate; 
+  animation-duration:         1s; 
+  animation-iteration-count:  infinite;
+  transition-timing-function: linear;
+}
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+
+input[type=number] {
+  margin: 0;
+  appearance: textfield;
 }
