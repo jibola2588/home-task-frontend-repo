@@ -12,12 +12,20 @@ import {
   getDocs,
   serverTimestamp,
   setDoc,
+  orderBy, query
 } from "firebase/firestore";
 import { db, storage } from '../../utils/firebase';
 
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 
+interface UserData {
+  name: string;
+  users: string;
+  products: string;
+  percentage: string;
+  id:string
+}
 
 export default function SecondUser(){ 
     const router = useRouter()
@@ -30,18 +38,34 @@ export default function SecondUser(){
     const [showImg,setShowImg] = useState(false)
 
     const [file, setFile] = useState<File | null>(null);
+    const [user, setUser] = useState<UserData | null>(null);
     const [data, setData] = useState({});
     const [per, setPerc] = useState<number | null>(null);
+    const [loading,setLoading] = useState(false)
+    const [alert,setAlert] = useState(false)
 
-    useEffect(() => { 
-    const fetchData = async () => { 
-      const querySnapshot = await getDocs(collection(db, "users"));
-querySnapshot.forEach((doc) => {
-  // doc.data() is never undefined for query doc snapshots
-  console.log(doc.id, " => ", doc.data());
-});
-    }
-    },[])
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const q = query(collection(db, 'users'), orderBy('timestamp', 'desc'));
+        const querySnapshot = await getDocs(q);
+        const list: UserData[] = [];
+        querySnapshot.forEach((doc) => {
+          list.push({ id: doc.id, ...doc.data() } as UserData);
+        });
+        setLoading(false);
+        if (list.length > 0) {
+          setUser(list[0]);
+        }
+      } catch (err) {
+        setLoading(false);
+        console.error('Error fetching data:', err);
+      }
+    };
+  
+    useEffect(() => {
+      fetchData();
+    }, []);
 
     useEffect(() => {
       const uploadFile = () => {
@@ -59,6 +83,12 @@ querySnapshot.forEach((doc) => {
               const progress =
                 (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
               console.log("Upload is " + progress + "% done");
+              if(progress == 100){
+                setTimeout(() => { 
+                  setAlert(true)
+                  console.log('alert is here')
+                },1000)
+              }
               setPerc(progress);
               switch (snapshot.state) {
                 case "paused":
@@ -70,6 +100,7 @@ querySnapshot.forEach((doc) => {
                 default:
                   break;
               }
+              
             },
             (error) => {
               console.log(error);
@@ -92,7 +123,7 @@ querySnapshot.forEach((doc) => {
     const onClose = () => { 
 
     }
-  
+    console.log('data is here',user)
     return( 
         <div> 
             <nav className="bg-grey-600 flex p-4 items-center justify-between border-b border-silver"> 
@@ -142,6 +173,14 @@ querySnapshot.forEach((doc) => {
                   className="hidden"
                 />
               </div>
+              <span>
+              { per === 100 && alert &&
+            <div role="alert" className="rounded border-s-4 border-green-500 bg-green-50 p-4">
+            <strong className="block font-medium text-green-800">image upload is {per} % complete</strong>
+          </div>
+         }
+
+              </span>
              
                 </div>
                 <div className='right'>
@@ -149,7 +188,7 @@ querySnapshot.forEach((doc) => {
                         {/* <button className='bg-black text-white text-sm rounded-md py-2 px-3 text-center'>Show details</button> */}
             <span className='w-[8rem]'>
              <Button 
-             label='Show details'
+             label={showImg ? 'Hide details' : 'Show details'}
              size='small'
              color='black'
              customclassname='bg-black text-white mt-2'
@@ -157,29 +196,34 @@ querySnapshot.forEach((doc) => {
              />
              </span>
                     </div>
-                   {showImg && <div className='p-2'>
+                   {showImg  && <div className='p-2'>
                         <Heading3 
                         label='Details for user A'
                         classname='text-center'
                         />
-                        <div className='mt-2 space-y-2'>
-                         <div className='flex items-center justify-between'>
-                            <span>Company name : </span>
-                            <span>Ajibola</span>
+                        { 
+                         loading ? <p>fetching data...</p> :(
+                          <div className='mt-2 space-y-2'>
+                          <div className='flex items-center gap-1'>
+                             <span>Company name: </span>
+                             <span className='text-base font-semibold uppercase'>{ user?.name}</span>
+                          </div>
+                          <div className='flex items-center  gap-1'>
+                             <span>Number of users : </span>
+                             <span className='text-base font-semibold uppercase'>{user?.users}</span>
+                          </div>
+                          <div className='flex items-center gap-1'>
+                             <span>Number of product : </span>
+                             <span className='text-base font-semibold uppercase'>{user?.products}</span>
+                          </div>
+                          <div className='flex items-center  gap-1'>
+                             <span>Percentage : </span>
+                             <span className='text-base font-semibold uppercase'>{user?.percentage}</span>
+                          </div>
                          </div>
-                         <div className='flex items-center justify-between'>
-                            <span>Number of users : </span>
-                            <span>4</span>
-                         </div>
-                         <div className='flex items-center justify-between'>
-                            <span>Number of product : </span>
-                            <span>3</span>
-                         </div>
-                         <div className='flex items-center justify-between'>
-                            <span>Percentage : </span>
-                            <span>33%</span>
-                         </div>
-                        </div>
+                         )
+                        }
+                       
                     </div>}
                 </div>
             </section>

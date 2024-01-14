@@ -38,7 +38,6 @@ export default function Home(){
       }
     }, []);
 
-
     const { handleChange, handleSubmit, inputs } = useForm(
         {
           email:'',
@@ -48,24 +47,29 @@ export default function Home(){
           products:''
         },
        async () => {
-        
+         if(!(name && users && products && percentage)){ 
+             setErmsg('missing field found')
+             return
+         } 
         try{
-          // setIsLoading(true)
+          setIsLoading(true)
           const {name,users,products} = inputs;
-          // if(!(name && users && products && percentage)){ 
-          //     setErmsg('missing field found')
-          //     return
-          // } 
           console.log('inputs',inputs)
           const res =  await addDoc(collection(db, "users"), {
              name,percentage,users,products,
               timeStamp:serverTimestamp()
             });
+            setIsLoading(false)
+            setSuccess(true)
             console.log('res is here',res)
-            console.log('details is here',{name,users,products,percentage})
+           
+
+            // console.log('details is here',{name,users,products,percentage})
 
         }catch(err){ 
             console.log(err)
+            setIsLoading(false)
+            setErmsg('Request failed')
         }
         })
 
@@ -87,6 +91,10 @@ export default function Home(){
             setPercentage('');
           }
         }, [users, products]);
+
+        useEffect(() => { 
+        setErmsg('')
+        },[name,users,products])
       
     
     return( 
@@ -105,9 +113,10 @@ export default function Home(){
             <section className="mx-auto max-w-[500px] mt-6 border shadow-md p-6"> 
             { success &&
             <div role="alert" className="rounded border-s-4 border-green-500 bg-green-50 p-4">
-            <strong className="block font-medium text-green-800">Successful </strong>
+            <strong className="block font-medium text-green-800">Success</strong>
           
             <p className="mt-2 text-sm text-green-700">
+            The user data has been successfully registered in the database.
             </p>
           </div>
          }
