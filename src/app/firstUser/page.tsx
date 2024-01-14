@@ -94,6 +94,7 @@ export default function Home(){
 
         useEffect(() => { 
         setErmsg('')
+        setSuccess(false)
         },[name,users,products])
       
     
