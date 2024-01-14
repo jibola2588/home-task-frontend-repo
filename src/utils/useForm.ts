@@ -30,7 +30,11 @@ const useForm = (initState: FormState, callback: () => void) => {
     }
   };
 
-  return { handleChange, handleSubmit, inputs };
+  const resetForm = () => {
+    setInputs(initState);
+  };
+
+  return { handleChange, handleSubmit, inputs,resetForm };
 };
 
 export default useForm;
