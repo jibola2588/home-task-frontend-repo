@@ -38,7 +38,7 @@ export default function Home(){
       }
     }, []);
 
-    const { handleChange, handleSubmit, inputs } = useForm(
+    const { handleChange, handleSubmit, inputs,resetForm } = useForm(
         {
           email:'',
           password: '',
@@ -61,8 +61,12 @@ export default function Home(){
             });
             setIsLoading(false)
             setSuccess(true)
+            setTimeout(() => { 
+              setSuccess(false)
+            },2000)
+
             console.log('res is here',res)
-           
+            resetForm();
 
             // console.log('details is here',{name,users,products,percentage})
 

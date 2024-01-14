@@ -12,7 +12,6 @@ import {
   getDocs,
   serverTimestamp,
   setDoc,
-  orderBy, query
 } from "firebase/firestore";
 import { db, storage } from '../../utils/firebase';
 
@@ -24,7 +23,8 @@ interface UserData {
   users: string;
   products: string;
   percentage: string;
-  id:string
+  id:string;
+  timeStamp:any
 }
 
 export default function SecondUser(){ 
@@ -47,12 +47,19 @@ export default function SecondUser(){
     const fetchData = async () => {
       setLoading(true);
       try {
-        const q = query(collection(db, 'users'), orderBy('timestamp', 'desc'));
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await getDocs(collection(db, 'users'));
         const list: UserData[] = [];
+        // querySnapshot.forEach((doc) => {
+        //   list.push({ id: doc.id, ...doc.data() } as UserData);
+        // });
         querySnapshot.forEach((doc) => {
           list.push({ id: doc.id, ...doc.data() } as UserData);
         });
+    
+        // Sort the array based on the timestamp in descending order
+        
+        list.sort((a, b) => b.timeStamp.toDate() - a.timeStamp.toDate());
+        console.log('list is',list)
         setLoading(false);
         if (list.length > 0) {
           setUser(list[0]);
@@ -72,8 +79,8 @@ export default function SecondUser(){
         if (file) {
           const name = new Date().getTime() + file.name;
   
-          console.log(name);
-          console.log('storage is',storage);
+          // console.log(name);
+          // console.log('storage is',storage);
           const storageRef = ref(storage, file.name);
           const uploadTask = uploadBytesResumable(storageRef, file);
   
@@ -86,7 +93,7 @@ export default function SecondUser(){
               if(progress == 100){
                 setTimeout(() => { 
                   setAlert(true)
-                  console.log('alert is here')
+                  // console.log('alert is here')
                 },1000)
               }
               setPerc(progress);
@@ -123,7 +130,7 @@ export default function SecondUser(){
     const onClose = () => { 
 
     }
-    console.log('data is here',user)
+    // console.log('data is here',user)
     return( 
         <div> 
             <nav className="bg-grey-600 flex p-4 items-center justify-between border-b border-silver"> 
